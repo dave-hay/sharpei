@@ -3,7 +3,7 @@ package lexer
 import (
 	"testing"
 
-	"sharpei/token"
+	"github.com/sharpei/token"
 )
 
 func TestNextToken(t *testing.T) {
