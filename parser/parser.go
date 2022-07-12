@@ -31,6 +31,17 @@ const (
 	CALL        // myFunction(X)
 )
 
+var precedences = map[token.TType]int{
+	token.EQ:       EQUALS,
+	token.NOT_EQ:   EQUALS,
+	token.LT:       LESSGREATER,
+	token.RT:       LESSGREATER,
+	token.PLUS:     SUM,
+	token.MINUS:    SUM,
+	token.SLASH:    PRODUCT,
+	token.ASTERISK: PRODUCT,
+}
+
 // formatted error mesage
 func (p *Parser) noPrefixParseFnError(t token.TType) {
 	msg := fmt.Sprintf("no prefix parse function for %s found", t)
@@ -219,4 +230,20 @@ func (p *Parser) expectPeek(t token.TType) bool {
 		p.peekError(t)
 		return false
 	}
+}
+
+func (p *Parser) peekPrecedence() int {
+	if p, ok := precedences[p.peekToken.Type]; ok {
+		return p
+	}
+
+	return LOWEST
+}
+
+func (p *Parser) curPrecedence() int {
+	if p, ok := precedences[p.curToken.Type]; ok {
+		return p
+	}
+
+	return LOWEST
 }
