@@ -2,16 +2,27 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/sharpei/ast"
 	"github.com/sharpei/lexer"
 	"github.com/sharpei/token"
 )
 
 type Parser struct {
-	l         *lexer.Lexer
-	errors    []string
-	curToken  token.Token
-	peekToken token.Token
+	l              *lexer.Lexer
+	errors         []string
+	curToken       token.Token
+	peekToken      token.Token
+	prefixParseFns map[token.TType]prefixParseFn
+	infixParseFns  map[token.TType]infixParseFn
+}
+
+func (p *Parser) registerPrefix(tokenType token.TType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+func (p *Parser) registerInfix(tokenType token.TType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
 }
 
 type (
@@ -19,6 +30,7 @@ type (
 	infixParseFn  func(expression ast.Expression) ast.Expression
 )
 
+// New creates a new Parser
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
