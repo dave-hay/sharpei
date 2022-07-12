@@ -7,6 +7,42 @@ import (
 	"github.com/sharpei/lexer"
 )
 
+// p 56
+func TestIntegerLiteralExpression(t *testing.T) {
+	input := "5;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program does not have enough statements. got=%d", len(program.Statements))
+	}
+
+	// check that statement is correct type
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	// make sure *ast.ExpressionStatement.Expression is an *ast.IntegerLiteral
+	literal, ok := stmt.Expression.(*ast.IntegerLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.IntegerLiteral. got=%T", stmt.Expression)
+	}
+
+	// check if has correct value
+	if ident.Value != 5 {
+		t.Errorf("ident.Value not %s. got=%s", 5, ident.Value)
+	}
+	if ident.TokenLiteral() != 5 {
+		t.Errorf("ident.TokenLiteral not %s. got=%s", 5, ident.TokenLiteral())
+	}
+
+}
+
 // Page 54
 func TestIdentifierExperession(t *testing.T) {
 	input := "foobar;"
