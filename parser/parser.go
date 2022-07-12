@@ -31,6 +31,12 @@ const (
 	CALL        // myFunction(X)
 )
 
+// formatted error mesage
+func (p *Parser) noPrefixParseFnError(t token.TType) {
+	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+	p.errors = append(p.errors, msg)
+}
+
 // parseIntegerLiteral: turns string into int64
 func (p *Parser) parseIntegerLiteral() ast.Expression {
 	lit := &ast.IntegerLiteral{Token: p.curToken}
@@ -141,6 +147,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 
 	if prefix == nil {
+		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
 	}
 	leftExp := prefix()
