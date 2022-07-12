@@ -34,11 +34,11 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 
 	// check if has correct value
-	if ident.Value != 5 {
-		t.Errorf("ident.Value not %s. got=%s", 5, ident.Value)
+	if literal.Value != 5 {
+		t.Errorf("ident.Value not %d. got=%d", 5, literal.Value)
 	}
-	if ident.TokenLiteral() != 5 {
-		t.Errorf("ident.TokenLiteral not %s. got=%s", 5, ident.TokenLiteral())
+	if literal.TokenLiteral() != "5" {
+		t.Errorf("ident.TokenLiteral not %s. got=%s", "5", literal.TokenLiteral())
 	}
 
 }
