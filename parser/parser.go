@@ -35,14 +35,14 @@ var precedences = map[token.TType]int{
 	token.EQ:       EQUALS,
 	token.NOT_EQ:   EQUALS,
 	token.LT:       LESSGREATER,
-	token.RT:       LESSGREATER,
+	token.GT:       LESSGREATER,
 	token.PLUS:     SUM,
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 }
 
-// formatted error mesage
+// formatted error message
 func (p *Parser) noPrefixParseFnError(t token.TType) {
 	msg := fmt.Sprintf("no prefix parse function for %s found", t)
 	p.errors = append(p.errors, msg)
@@ -102,7 +102,14 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
+	p.registerPrefix(token.PLUS, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+	p.registerPrefix(token.SLASH, p.parsePrefixExpression)
+	p.registerPrefix(token.ASTERISK, p.parsePrefixExpression)
+	p.registerPrefix(token.EQ, p.parsePrefixExpression)
+	p.registerPrefix(token.NOT_EQ, p.parsePrefixExpression)
+	p.registerPrefix(token.LT, p.parsePrefixExpression)
+	p.registerPrefix(token.GT, p.parsePrefixExpression)
 
 	// read 2 tokens to set cur and peek
 	p.nextToken()
@@ -171,12 +178,22 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 // parseExpression checks if parsing func assocciated with p.curToken.Type
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
-
 	if prefix == nil {
 		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
 	}
 	leftExp := prefix()
+
+	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
+		infix := p.infixParseFns[p.peekToken.Type]
+		if infix == nil {
+			return leftExp
+		}
+
+		p.nextToken()
+
+		leftExp = infix(leftExp)
+	}
 
 	return leftExp
 }
@@ -246,4 +263,18 @@ func (p *Parser) curPrecedence() int {
 	}
 
 	return LOWEST
+}
+
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	expression := &ast.InfixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+		Left:     left,
+	}
+
+	precedence := p.curPrecedence()
+	p.nextToken()
+	expression.Right = p.parseExpression(precedence)
+
+	return expression
 }

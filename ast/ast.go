@@ -47,7 +47,7 @@ func (p *Program) String() string {
 
 // infix expression
 type InfixExpression struct {
-	Token    token.Token
+	Token    token.Token // Operator token i.e. +, -, /
 	Left     Expression
 	Operator string
 	Right    Expression

@@ -20,7 +20,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"5 - 5;", 5, "-", 5},
 		{"5 * 5;", 5, "*", 5},
 		{"5 / 5;", 5, "/", 5},
-		{"5 > 5;", 5, "-", 5},
+		{"5 > 5;", 5, ">", 5},
 		{"5 < 5;", 5, "<", 5},
 		{"5 == 5;", 5, "==", 5},
 		{"5 != 5;", 5, "!=", 5},
@@ -43,7 +43,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 				program.Statements[0])
 		}
 
-		exp, ok := stmt.Expression(*ast.InfixExpression)
+		exp, ok := stmt.Expression.(*ast.InfixExpression)
 		if !ok {
 			t.Fatalf("exp is not ast.InfixExpression. got=%T", stmt.Expression)
 		}
