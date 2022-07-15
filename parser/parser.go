@@ -10,10 +10,11 @@ import (
 )
 
 type Parser struct {
-	l              *lexer.Lexer
-	errors         []string
-	curToken       token.Token
-	peekToken      token.Token
+	l         *lexer.Lexer
+	errors    []string
+	curToken  token.Token
+	peekToken token.Token
+
 	prefixParseFns map[token.TType]prefixParseFn
 	infixParseFns  map[token.TType]infixParseFn
 }
@@ -62,7 +63,6 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	lit.Value = value
 
 	return lit
-
 }
 
 func (p *Parser) registerPrefix(tokenType token.TType, fn prefixParseFn) {
@@ -75,7 +75,7 @@ func (p *Parser) registerInfix(tokenType token.TType, fn infixParseFn) {
 
 type (
 	prefixParseFn func() ast.Expression
-	infixParseFn  func(expression ast.Expression) ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
 )
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
@@ -85,7 +85,6 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	}
 
 	p.nextToken()
-
 	expression.Right = p.parseExpression(PREFIX)
 
 	return expression
@@ -102,14 +101,18 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
-	p.registerPrefix(token.PLUS, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
-	p.registerPrefix(token.SLASH, p.parsePrefixExpression)
-	p.registerPrefix(token.ASTERISK, p.parsePrefixExpression)
-	p.registerPrefix(token.EQ, p.parsePrefixExpression)
-	p.registerPrefix(token.NOT_EQ, p.parsePrefixExpression)
-	p.registerPrefix(token.LT, p.parsePrefixExpression)
-	p.registerPrefix(token.GT, p.parsePrefixExpression)
+
+	p.infixParseFns = make(map[token.TType]infixParseFn)
+
+	p.registerInfix(token.PLUS, p.parseInfixExpression)
+	p.registerInfix(token.MINUS, p.parseInfixExpression)
+	p.registerInfix(token.SLASH, p.parseInfixExpression)
+	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(token.EQ, p.parseInfixExpression)
+	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
+	p.registerInfix(token.LT, p.parseInfixExpression)
+	p.registerInfix(token.GT, p.parseInfixExpression)
 
 	// read 2 tokens to set cur and peek
 	p.nextToken()
@@ -178,6 +181,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 // parseExpression checks if parsing func assocciated with p.curToken.Type
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
+
 	if prefix == nil {
 		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
@@ -249,6 +253,7 @@ func (p *Parser) expectPeek(t token.TType) bool {
 	}
 }
 
+// 65
 func (p *Parser) peekPrecedence() int {
 	if p, ok := precedences[p.peekToken.Type]; ok {
 		return p
