@@ -10,6 +10,26 @@ import (
 
 // ___
 
+// 77
+func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {
+	ident, ok := exp.(*ast.Identifier)
+	if !ok {
+		t.Errorf("exp not *ast.Identifier. got=%T", exp)
+		return false
+	}
+
+	if ident.Value != value {
+		t.Errorf("ident.Value not %s. got=%s", value, ident.Value)
+		return false
+	}
+
+	if ident.TokenLiteral() != value {
+		t.Errorf("ident.TOkenLIteral not %s. got=%s", value, ident.TokenLiteral())
+		return false
+	}
+	return true
+}
+
 // 67
 func TestOperatorPrecedenceParsing(t *testing.T) {
 	tests := []struct {
