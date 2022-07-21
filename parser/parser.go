@@ -24,7 +24,7 @@ type (
 	infixParseFn  func(ast.Expression) ast.Expression
 )
 
-// Setting the heirarchy of operator importance
+// Setting the hierarchy of operator importance
 // page 55give following constants incrementing numbers as values
 const (
 	_ int = iota // takes value 0
@@ -64,6 +64,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FALSE, p.parseBoolean)
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(token.IF, p.parseIfExpression)
+	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 
 	p.infixParseFns = make(map[token.TType]infixParseFn)
 
@@ -120,6 +121,53 @@ func (p *Parser) registerPrefix(tokenType token.TType, fn prefixParseFn) {
 
 func (p *Parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)}
+}
+
+// 92
+func (p *Parser) parseFunctionLiteral() ast.Expression {
+	lit := &ast.FunctionLiteral{Token: p.curToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	lit.Parameters = p.parseFunctionParameters()
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	lit.Body = p.parseBlockStatement()
+
+	return lit
+}
+
+// 92
+func (p *Parser) parseFunctionParameters() []*ast.Identifier {
+	identifiers := []*ast.Identifier{}
+
+	if p.peekTokenIs(token.RPAREN) {
+		p.nextToken()
+		return identifiers
+	}
+
+	p.nextToken()
+
+	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	identifiers = append(identifiers, ident)
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		identifiers = append(identifiers, ident)
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return identifiers
 }
 
 func (p *Parser) parseGroupedExpression() ast.Expression {
