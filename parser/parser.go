@@ -26,8 +26,9 @@ type (
 
 // Setting the hierarchy of operator importance
 // page 55give following constants incrementing numbers as values
+// Lowest to highest
 const (
-	_ int = iota // takes value 0
+	_ int = iota // use iota to give the rest values
 	LOWEST
 	EQUALS      // ==
 	LESSGREATER // < or >
@@ -109,7 +110,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 *************************
 */
 func (p *Parser) parsePrefixExpression() ast.Expression {
-	// defer untrace(trace("parsePrefixExpression"))
+	//defer untrace(trace("parsePrefixExpression"))
 	expression := &ast.PrefixExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,
@@ -315,9 +316,9 @@ func (p *Parser) parseStatement() ast.Statement {
 	Expressions
 **************************/
 
-// parseExpression checks if parsing func assocciated with p.curToken.Type
+// parseExpression checks if parsing func associated with p.curToken.Type
 func (p *Parser) parseExpression(precedence int) ast.Expression {
-	// defer untrace(trace("parseExpression"))
+	//defer untrace(trace("parseExpression"))
 	prefix := p.prefixParseFns[p.curToken.Type]
 
 	if prefix == nil {
@@ -341,11 +342,12 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
-	// defer untrace(trace("parseExpressionStatement"))
+	//defer untrace(trace("parseExpressionStatement"))
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 
 	stmt.Expression = p.parseExpression(LOWEST)
 
+	// if peekToken == semicolon -> advance so it's curToken 55
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -358,13 +360,14 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 **************************/
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	//defer untrace(trace("parseReturnStatement"))
 	stmt := &ast.ReturnStatement{Token: p.curToken}
 
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
 
-	for !p.curTokenIs(token.SEMICOLON) {
+	for p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -376,6 +379,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 **************************/
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {
+	//defer untrace(trace("parseLetStatement"))
 	stmt := &ast.LetStatement{Token: p.curToken}
 
 	if !p.expectPeek(token.IDENT) {
@@ -392,7 +396,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
-	for !p.curTokenIs(token.SEMICOLON) {
+	for p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 	return stmt
