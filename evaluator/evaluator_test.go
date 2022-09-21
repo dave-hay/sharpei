@@ -17,6 +17,31 @@ func testEval(input string) object.Object {
 
 }
 
+/*********************
+*** TEST BANG OPERATOR
+**********************/
+
+// operator should convert operand to boolean and negate it
+func TestBangOperator(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"!true", false},
+		{"!!true", true},
+		{"!false", true},
+		{"!!false", false},
+		{"!5", false},
+		{"!!5", true},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testBooleanObject(t, evaluated, tt.expected)
+	}
+
+}
+
 /***************
 *** TEST INTEGER
 ****************/
