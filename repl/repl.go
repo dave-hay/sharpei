@@ -3,10 +3,12 @@ package repl
 import (
 	"bufio"
 	"fmt"
-	"github.com/sharpei/lexer"
-	"github.com/sharpei/parser"
 	"io"
 	"log"
+
+	"github.com/sharpei/evaluator"
+	"github.com/sharpei/lexer"
+	"github.com/sharpei/parser"
 )
 
 const PROMPT = ">> "
@@ -31,12 +33,16 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		if _, err := io.WriteString(out, program.String()); err != nil {
-			log.Fatalln(err)
+		evaluated := evaluator.Eval(program)
+		if evaluated != nil {
+			if _, err := io.WriteString(out, evaluated.Inspect()); err != nil {
+				log.Fatalln(err)
+			}
+			if _, err := io.WriteString(out, "\n"); err != nil {
+				log.Fatalln(err)
+			}
 		}
-		if _, err := io.WriteString(out, "\n"); err != nil {
-			log.Fatalln(err)
-		}
+
 	}
 }
 
@@ -48,12 +54,12 @@ c_c__/-c____/
 `
 
 const DOG2 = `
-     |\_/|                  
-     | @ @   Woof! 
-     |   <>              _  
+     |\_/|
+     | @ @   Woof!
+     |   <>              _
      |  _/\------____ ((| |))
-     |               '--' |   
-____|_       ___|   |___.' 
+     |               '--' |
+____|_       ___|   |___.'
 /_/_____/____/_______|
 Look like Phil found an error!
  parser errors:
