@@ -142,13 +142,13 @@ func TestIfElseExpression(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{"if (true) { 10 }", 10},
-		{"if (false) { 10 }", nil},
-		{"if (1) { 10 }", 10},
-		{"if (1 < 2) { 10 }", 10},
-		{"if (1 > 2) { 10 }", nil},
-		{"if (1 > 2) { 10 } else { 20 }", 20},
-		{"if (1 < 2) { 10 } else { 20 }", 10},
+		{"if (true) { 1 }", 1},
+		{"if (false) { 2 }", nil},
+		{"if (1) { 3 }", 3},
+		{"if (1 < 2) { 4 }", 4},
+		{"if (1 > 2) { 5 }", nil},
+		{"if (1 > 2) { 6 } else { 7 }", 7},
+		{"if (1 < 2) { 8 } else { 9 }", 8},
 	}
 
 	for _, tt := range tests {

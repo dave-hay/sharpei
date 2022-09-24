@@ -1,15 +1,8 @@
 package object
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type ObjectType string
-
-type Object interface {
-	Type() ObjectType
-	Inspect() string
-}
 
 const (
 	INTEGER_OBJ = "INTEGER"
@@ -17,12 +10,17 @@ const (
 	NULL_OBJ    = "NULL"
 )
 
+type Object interface {
+	Type() ObjectType
+	Inspect() string
+}
+
 type Integer struct {
 	Value int64
 }
 
-func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
+func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 
 type Boolean struct {
 	Value bool
@@ -35,5 +33,3 @@ type Null struct{}
 
 func (n *Null) Type() ObjectType { return NULL_OBJ }
 func (n *Null) Inspect() string  { return "null" }
-
-// func Eval(node ast.Node) object.Object {}
