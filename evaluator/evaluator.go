@@ -32,7 +32,7 @@ func Eval(node ast.Node) object.Object {
 		right := Eval(node.Right)
 		return evalPrefixExpression(node.Operator, right)
 	case *ast.Boolean:
-		return &object.Boolean{Value: node.Value}
+		return nativeBoolToBooleanObject(node.Value)
 	case *ast.InfixExpression:
 		left := Eval(node.Left)
 		right := Eval(node.Right)
