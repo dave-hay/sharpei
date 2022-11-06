@@ -1,7 +1,15 @@
 package object
 
+// outer is lexical/closing environment
 type Environment struct {
 	store map[string]Object
+	outer *Environment
+}
+
+func NewEnclosedEnvironment(outer *Environment) *Environment {
+	env := NewEnvironment()
+	env.outer = outer
+	return env
 }
 
 func NewEnvironment() *Environment {
@@ -11,6 +19,10 @@ func NewEnvironment() *Environment {
 
 func (e *Environment) Get(name string) (Object, bool) {
 	obj, ok := e.store[name]
+	if !ok && e.outer != nil {
+		obj, ok = e.outer.Get(name)
+
+	}
 	return obj, ok
 }
 

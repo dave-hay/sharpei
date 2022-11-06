@@ -70,7 +70,6 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 
-// 90
 type FunctionLiteral struct {
 	Token      token.Token
 	Parameters []*Identifier
