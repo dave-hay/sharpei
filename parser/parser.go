@@ -319,6 +319,8 @@ func (p *Parser) parseStatement() ast.Statement {
 // parseExpression checks if parsing func associated with p.curToken.Type
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	//defer untrace(trace("parseExpression"))
+	// TODO: Causes error when curToken is semicolon
+	// 	semicolon doesn't get a type
 	prefix := p.prefixParseFns[p.curToken.Type]
 
 	if prefix == nil {
@@ -348,6 +350,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt.Expression = p.parseExpression(LOWEST)
 
 	// if peekToken == semicolon -> advance so it's curToken 55
+	// allows for optional semicolon
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -367,7 +370,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
 
-	for p.curTokenIs(token.SEMICOLON) {
+	for p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -396,7 +399,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
-	for p.curTokenIs(token.SEMICOLON) {
+	for p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 	return stmt
@@ -426,6 +429,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	Precedence - 65
 **************************/
 
+// if precedence not found returns LOWEST
 func (p *Parser) peekPrecedence() int {
 	if p, ok := precedences[p.peekToken.Type]; ok {
 		return p
